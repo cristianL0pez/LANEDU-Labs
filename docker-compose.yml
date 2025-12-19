@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: lanedu_labs_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://lanedu:lanedu@db:5432/lanedu
+    depends_on:
+      - db
+    volumes:
+      - ./backend/app:/app/app:ro
+
+  db:
+    image: postgres:15
+    container_name: lanedu_labs_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lanedu
+      POSTGRES_PASSWORD: lanedu
+      POSTGRES_DB: lanedu
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
