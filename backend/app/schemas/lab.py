@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class LabBase(BaseModel):
@@ -27,8 +27,7 @@ class LabRead(LabBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LabSummary(BaseModel):
@@ -40,5 +39,4 @@ class LabSummary(BaseModel):
     xp_otorgado: int
     estado: Optional[str] = None  # State for the requesting user (e.g., DISPONIBLE/BLOQUEADO)
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

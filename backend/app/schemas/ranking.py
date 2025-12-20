@@ -1,7 +1,7 @@
 """Pydantic schemas for ranking and profile responses."""
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 from app.schemas.lab import LabSummary
 
@@ -17,8 +17,7 @@ class UserProfileResponse(BaseModel):
     labs_completados: int
     labs: List[LabSummary] = []
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RankingEntry(BaseModel):
@@ -28,5 +27,4 @@ class RankingEntry(BaseModel):
     xp_total: int
     nivel: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
