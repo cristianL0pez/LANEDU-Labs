@@ -18,39 +18,15 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Create initial tables for users, labs, and user_lab_progress."""
-    # Ensure enums exist (idempotent create).
+    # Ensure enums exist (idempotent create with IF NOT EXISTS to avoid duplicates).
     op.execute(
-        """
-        DO $$
-        BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'difficulty_level') THEN
-                CREATE TYPE difficulty_level AS ENUM ('BEGINNER', 'INTERMEDIATE', 'ADVANCED');
-            END IF;
-        END
-        $$;
-        """
+        "CREATE TYPE IF NOT EXISTS difficulty_level AS ENUM ('BEGINNER', 'INTERMEDIATE', 'ADVANCED')"
     )
     op.execute(
-        """
-        DO $$
-        BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lab_initial_state') THEN
-                CREATE TYPE lab_initial_state AS ENUM ('DISPONIBLE', 'BLOQUEADO');
-            END IF;
-        END
-        $$;
-        """
+        "CREATE TYPE IF NOT EXISTS lab_initial_state AS ENUM ('DISPONIBLE', 'BLOQUEADO')"
     )
     op.execute(
-        """
-        DO $$
-        BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'progress_state') THEN
-                CREATE TYPE progress_state AS ENUM ('PENDIENTE', 'COMPLETADO');
-            END IF;
-        END
-        $$;
-        """
+        "CREATE TYPE IF NOT EXISTS progress_state AS ENUM ('PENDIENTE', 'COMPLETADO')"
     )
 
     difficulty_level = sa.Enum(
@@ -134,12 +110,6 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_users_id"), table_name="users")
     op.drop_table("users")
 
-    op.execute(
-        "DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'progress_state') THEN DROP TYPE progress_state; END IF; END $$;"
-    )
-    op.execute(
-        "DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lab_initial_state') THEN DROP TYPE lab_initial_state; END IF; END $$;"
-    )
-    op.execute(
-        "DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'difficulty_level') THEN DROP TYPE difficulty_level; END IF; END $$;"
-    )
+    op.execute("DROP TYPE IF EXISTS progress_state")
+    op.execute("DROP TYPE IF EXISTS lab_initial_state")
+    op.execute("DROP TYPE IF EXISTS difficulty_level")
