@@ -5,7 +5,7 @@ from enum import Enum
 from sqlalchemy import CheckConstraint, Column, DateTime, Enum as PgEnum, Integer, String, Text, func
 from sqlalchemy.orm import relationship
 
-from app.db.base import Base
+from app.db.base_class import Base
 
 
 class DifficultyLevel(str, Enum):

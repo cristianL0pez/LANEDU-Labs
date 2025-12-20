@@ -1,7 +1,5 @@
-"""Declarative base and model registry for SQLAlchemy."""
-from sqlalchemy.orm import declarative_base
-
-Base = declarative_base()
+"""Model registry for SQLAlchemy metadata discovery."""
+from app.db.base_class import Base  # Declarative base
 
 # Import models here so that Alembic and metadata discovery work automatically.
 # These imports should stay at the bottom to avoid circular dependencies.
