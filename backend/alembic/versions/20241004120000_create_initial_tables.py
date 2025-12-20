@@ -18,13 +18,48 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Create initial tables for users, labs, and user_lab_progress."""
-    difficulty_level = sa.Enum("BEGINNER", "INTERMEDIATE", "ADVANCED", name="difficulty_level")
-    lab_initial_state = sa.Enum("DISPONIBLE", "BLOQUEADO", name="lab_initial_state")
-    progress_state = sa.Enum("PENDIENTE", "COMPLETADO", name="progress_state")
+    # Ensure enums exist (idempotent create).
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'difficulty_level') THEN
+                CREATE TYPE difficulty_level AS ENUM ('BEGINNER', 'INTERMEDIATE', 'ADVANCED');
+            END IF;
+        END
+        $$;
+        """
+    )
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lab_initial_state') THEN
+                CREATE TYPE lab_initial_state AS ENUM ('DISPONIBLE', 'BLOQUEADO');
+            END IF;
+        END
+        $$;
+        """
+    )
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'progress_state') THEN
+                CREATE TYPE progress_state AS ENUM ('PENDIENTE', 'COMPLETADO');
+            END IF;
+        END
+        $$;
+        """
+    )
 
-    difficulty_level.create(op.get_bind(), checkfirst=True)
-    lab_initial_state.create(op.get_bind(), checkfirst=True)
-    progress_state.create(op.get_bind(), checkfirst=True)
+    difficulty_level = sa.Enum(
+        "BEGINNER", "INTERMEDIATE", "ADVANCED", name="difficulty_level", create_type=False
+    )
+    lab_initial_state = sa.Enum(
+        "DISPONIBLE", "BLOQUEADO", name="lab_initial_state", create_type=False
+    )
+    progress_state = sa.Enum("PENDIENTE", "COMPLETADO", name="progress_state", create_type=False)
 
     op.create_table(
         "users",
@@ -99,10 +134,12 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_users_id"), table_name="users")
     op.drop_table("users")
 
-    progress_state = sa.Enum("PENDIENTE", "COMPLETADO", name="progress_state")
-    lab_initial_state = sa.Enum("DISPONIBLE", "BLOQUEADO", name="lab_initial_state")
-    difficulty_level = sa.Enum("BEGINNER", "INTERMEDIATE", "ADVANCED", name="difficulty_level")
-
-    progress_state.drop(op.get_bind(), checkfirst=True)
-    lab_initial_state.drop(op.get_bind(), checkfirst=True)
-    difficulty_level.drop(op.get_bind(), checkfirst=True)
+    op.execute(
+        "DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'progress_state') THEN DROP TYPE progress_state; END IF; END $$;"
+    )
+    op.execute(
+        "DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lab_initial_state') THEN DROP TYPE lab_initial_state; END IF; END $$;"
+    )
+    op.execute(
+        "DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'difficulty_level') THEN DROP TYPE difficulty_level; END IF; END $$;"
+    )
