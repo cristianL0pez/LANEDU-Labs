@@ -31,7 +31,9 @@ class UserLabProgress(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     lab_id = Column(Integer, ForeignKey("labs.id", ondelete="CASCADE"), nullable=False, index=True)
-    estado = Column(PgEnum(ProgressState, name="progress_state"), nullable=False)
+    estado = Column(
+        PgEnum(ProgressState, name="progress_state", create_type=False), nullable=False
+    )
     doc_url = Column(String(500), nullable=True)
     xp_obtenido = Column(Integer, nullable=False, default=0, server_default="0")
     completed_at = Column(DateTime(timezone=True), nullable=True)

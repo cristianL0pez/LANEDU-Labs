@@ -147,8 +147,7 @@ def seed(db: Session) -> None:
 
 def main():
     """Entrypoint for CLI usage."""
-    # Ensure metadata is available (Base imported above)
-    Base.metadata.create_all(bind=engine)
+    # Assumes migrations have already created the schema and enum types.
     db = SessionLocal()
     try:
         seed(db)

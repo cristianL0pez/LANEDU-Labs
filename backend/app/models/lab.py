@@ -35,9 +35,13 @@ class Lab(Base):
     id = Column(Integer, primary_key=True, index=True)
     codigo = Column(String(50), unique=True, nullable=False, index=True)
     titulo = Column(String(255), nullable=False)
-    nivel_dificultad = Column(PgEnum(DifficultyLevel, name="difficulty_level"), nullable=False)
+    nivel_dificultad = Column(
+        PgEnum(DifficultyLevel, name="difficulty_level", create_type=False), nullable=False
+    )
     xp_otorgado = Column(Integer, nullable=False)
-    estado_inicial = Column(PgEnum(LabInitialState, name="lab_initial_state"), nullable=False)
+    estado_inicial = Column(
+        PgEnum(LabInitialState, name="lab_initial_state", create_type=False), nullable=False
+    )
     historia = Column(Text, nullable=False)
     objetivo = Column(Text, nullable=False)
     reglas = Column(Text, nullable=False)
